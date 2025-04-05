@@ -1,4 +1,5 @@
-from utils.common_imports import *  
+from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
@@ -24,8 +25,8 @@ class Cadastro(Base):
         self.street = street
         self.number = number
         self.zip_code = zip_code
+
     def to_dict(self):
-        
         return {
             "id": self.id,
             "nickname": self.nickname,

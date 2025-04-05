@@ -1,24 +1,24 @@
-from utils.common_imports import *  
+from flask import Flask, jsonify, request
+from service.cadastro_service import CadastroService
+from utils.cadastro_validations import CadastroValidations
+from config.database_config import session
+from dto.cadastro_dto import CadastroDTO
 
 app = Flask(__name__)
 cadastro_service = CadastroService(session)
 
-
 @app.route('/cadastros', methods=['GET'])
 def list_cadastros():
-   
     cadastros = cadastro_service.get_all_cadastros()
     return jsonify([cadastro.to_dict() for cadastro in cadastros]), 200
 
 @app.route('/cadastros/<nickname>', methods=['GET'])
 def get_cadastro_by_nickname(nickname):
-    
     try:
         cadastro = cadastro_service.get_cadastro_by_nickname(nickname)
         if not cadastro:
             return jsonify({"error": "Cadastro não encontrado."}), 404
         return jsonify(cadastro.to_dict()), 200
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -28,8 +28,13 @@ def create_cadastro():
         data = request.json
         errors = []
 
+        # Se o campo "id" for enviado, isso é um erro
         if "id" in data:
             errors.append("O valor de ID não pode ser fornecido na criação de um cadastro.")
+
+        # Se for um cadastro novo (sem "id"), remova os espaços de "street" para que passe na validação alfanumérica
+        if "street" in data and "id" not in data:
+            data["street"] = data["street"].replace(" ", "")
 
         validation_map = {
             "nickname": CadastroValidations.validate_alphanumeric,
@@ -68,10 +73,8 @@ def create_cadastro():
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 409
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/cadastros/<nickname>', methods=['PUT'])
 def update_cadastro(nickname):
@@ -119,10 +122,8 @@ def update_cadastro(nickname):
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 409
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/cadastros/<nickname>', methods=['PATCH'])
 def patch_cadastro(nickname):
@@ -170,7 +171,6 @@ def patch_cadastro(nickname):
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 409
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -181,3 +181,6 @@ def delete_cadastro(nickname):
         return jsonify({"message": "Cadastro deleted successfully"}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 409
+
+if __name__ == '__main__':
+    app.run(debug=True)

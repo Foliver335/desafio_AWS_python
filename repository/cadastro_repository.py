@@ -1,4 +1,5 @@
-from utils.common_imports import *
+from entity.cadastro_entity import Cadastro
+
 
 class CadastroRepository:
     def __init__(self, session):

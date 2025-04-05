@@ -1,5 +1,3 @@
-from utils.common_imports import *  
-
 class CadastroValidations:
     @staticmethod
     def validate_alphanumeric(value, field_name):
@@ -8,8 +6,9 @@ class CadastroValidations:
 
     @staticmethod
     def validate_letters_only(value, field_name):
-        if not value or not value.isalpha():
-            raise ValueError(f"O campo '{field_name}' deve conter apenas letras.")
+        if not value or not all(char.isalpha() or char.isspace() for char in value):
+            raise ValueError(f"O campo '{field_name}' deve conter apenas letras e espaços.")
+
 
     @staticmethod
     def validate_email(value, field_name):

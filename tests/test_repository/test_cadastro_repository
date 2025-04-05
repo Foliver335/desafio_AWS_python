@@ -1,0 +1,41 @@
+import unittest
+from unittest.mock import MagicMock
+from repository.cadastro_repository import CadastroRepository
+from entity.cadastro_entity import Cadastro
+
+class TestCadastroRepository(unittest.TestCase):
+    def setUp(self):
+        self.session = MagicMock()
+        self.repository = CadastroRepository(self.session)
+
+    def test_save(self):
+        cadastro = Cadastro()
+        self.repository.save(cadastro)
+        self.session.add.assert_called_once_with(cadastro)
+        self.session.commit.assert_called_once()
+
+    def test_find_all(self):
+        self.repository.find_all()
+        self.session.query.assert_called_once_with(Cadastro)
+        self.session.query(Cadastro).all.assert_called_once()
+
+    def test_find_by_nickname(self):
+        nickname = 'test_nickname'
+        self.repository.find_by_nickname(nickname)
+        self.session.query.assert_called_once_with(Cadastro)
+        self.session.query(Cadastro).filter_by.assert_called_once_with(nickname=nickname)
+        self.session.query(Cadastro).filter_by(nickname=nickname).first.assert_called_once()
+
+    def test_update(self):
+        cadastro = Cadastro()
+        self.repository.update(cadastro)
+        self.session.commit.assert_called_once()
+
+    def test_delete(self):
+        cadastro = Cadastro()
+        self.repository.delete(cadastro)
+        self.session.delete.assert_called_once_with(cadastro)
+        self.session.commit.assert_called_once()
+
+if __name__ == '__main__':
+    unittest.main()
